@@ -19,14 +19,3 @@ def example_vnpy_interface(text):
         res.append((name, system))
 
     return res
-    # targets = root.find_all("div", attrs={"class": "section"}, limit=1)
-    # # res = list()
-    # for target in targets:
-    #     # name = target.contents[1].text[:-1]
-    #     # print(name)
-    # #     # tmp = list()
-    # #     # print(target)
-    # #     # if True:
-    # #     #     break
-
-    #     print(target, end="\n========\n")

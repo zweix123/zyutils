@@ -10,8 +10,9 @@ from bs4 import BeautifulSoup as bs
 class SpiderByRequests:
     def __init__(self):
         # ua池
-        user_anent = UserAgent(path=os.path.join(
-            os.getcwd(), "fake_useragent_0.1.11.json")).random  # ua池
+        user_anent = UserAgent(
+            path=os.path.join(os.getcwd(), "fake_useragent_0.1.11.json")
+        ).random  # ua池
         self.headers = {"User-Agent": user_anent}
         # ip池
 
@@ -24,9 +25,11 @@ class SpiderByRequests:
 class SpiderBySelenium:
     def __init__(self):
         options = Options()
-        options.add_argument('--headless')  # 设置chrome浏览器无界面模式
-        self.driver = webdriver.Chrome(executable_path=os.path.join(
-            os.getcwd(), "chromedriver.exe"), chrome_options=options)
+        options.add_argument("--headless")  # 设置chrome浏览器无界面模式
+        self.driver = webdriver.Chrome(
+            executable_path=os.path.join(os.getcwd(), "chromedriver.exe"),
+            chrome_options=options,
+        )
         self.TIME = 5  # 等待页面加载时间
         # 【Selenium】关闭INFO:CONSOLE提示: https://blog.csdn.net/Spade_/article/details/105903246
 
@@ -59,18 +62,21 @@ def get_luogu():
     for game in games:
         status = game.find("span", attrs={"class": "status"}).get_text().strip()
         if status == "未开始":
-            name = game.find("a", attrs={"class": "name color-default"}).get_text().strip()
-            time_and_duration = game.find("span", attrs={"class": "time"}).get_text().strip()
+            name = (
+                game.find("a", attrs={"class": "name color-default"}).get_text().strip()
+            )
+            time_and_duration = (
+                game.find("span", attrs={"class": "time"}).get_text().strip()
+            )
             print(name, time_and_duration)
             pass
-        
-        
+
         break
-    
+
     pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     get_luogu()
     pass
 

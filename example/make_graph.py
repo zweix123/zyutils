@@ -9,8 +9,7 @@ num, down, up, d = 100, -100, 100, 100
 def make_points(num, down, up):
     points = list()
     for _ in range(num):
-        points.append(Point(random.randint(down, up),
-                      random.randint(down, up)))
+        points.append(Point(random.randint(down, up), random.randint(down, up)))
     return points
 
 
@@ -29,17 +28,20 @@ def make_rectangle(rectangle):
 
 
 def make_circle(circle):
-    xs = np.arange(min(circle.p.x, circle.p.y) - circle.r,
-                   max(circle.p.x, circle.p.y) + circle.r, (up - down) / 10000)
+    xs = np.arange(
+        min(circle.p.x, circle.p.y) - circle.r,
+        max(circle.p.x, circle.p.y) + circle.r,
+        (up - down) / 10000,
+    )
     a = circle.p.x + circle.r * np.cos(xs)
     b = circle.p.y + circle.r * np.sin(xs)
-    plt.plot(a, b, linestyle='-')
+    plt.plot(a, b, linestyle="-")
 
 
 if __name__ == "__main__":
     plt.xlim(down - d, up + d)
     plt.ylim(down - d, up + d)
-    plt.axis('equal')
+    plt.axis("equal")
 
     points = make_points(num, down, up)
     t, rectangle = rotating_calipers(get_convex_by_andrew(points))

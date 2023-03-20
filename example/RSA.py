@@ -5,7 +5,7 @@ class RSA(Exception):
     def is_prime(self, num):
         if num <= 1:
             return False
-        for i in range(2, int(num ** 0.5) + 1, 1):
+        for i in range(2, int(num**0.5) + 1, 1):
             if num % i == 0:
                 return False
         return True
@@ -31,9 +31,14 @@ class RSA(Exception):
         self.secret_key_phi = (self.prime_p - 1) * (self.prime_q - 1)
 
         if math.gcd(self.secret_key_phi, secret_key_e) != 1:
-            str_msg = str_msg + \
-                "公开指数e(" + str(secret_key_e) + \
-                ")和\phi{n} = " + str(self.secret_key_phi) + "不是互为素数"
+            str_msg = (
+                str_msg
+                + "公开指数e("
+                + str(secret_key_e)
+                + ")和\phi{n} = "
+                + str(self.secret_key_phi)
+                + "不是互为素数"
+            )
 
         self.secrect_key_e = secret_key_e
 
@@ -41,22 +46,25 @@ class RSA(Exception):
             raise Exception(str_msg)
 
         self.secrect_key_d, sam1, sam2 = self.exgcd(
-            self.secrect_key_e, self.secret_key_phi)
-        self.secrect_key_d = (self.secrect_key_d +
-                              self.secret_key_phi) % self.secret_key_phi
+            self.secrect_key_e, self.secret_key_phi
+        )
+        self.secrect_key_d = (
+            self.secrect_key_d + self.secret_key_phi
+        ) % self.secret_key_phi
 
     def __str__(self):
-        return "该RSA系统的公钥为(n = {}, e = {}), 私钥为(d = {})".format(self.secret_key_n, self.secrect_key_e, self.secrect_key_d)
+        return "该RSA系统的公钥为(n = {}, e = {}), 私钥为(d = {})".format(
+            self.secret_key_n, self.secrect_key_e, self.secrect_key_d
+        )
 
     def e_(self, num):
-        return num ** self.secrect_key_e % self.secret_key_n
+        return num**self.secrect_key_e % self.secret_key_n
 
     def d_(self, num):
-        return num ** self.secrect_key_d % self.secret_key_n
+        return num**self.secrect_key_d % self.secret_key_n
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     sam = RSA(3, 11, 3)
     print(sam)
     print(sam.e_(11))

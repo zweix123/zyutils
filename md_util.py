@@ -29,8 +29,6 @@ def process_images(content, func):
     return re.sub(patten, modify, content)
 
 
-###
-
 from markdown import markdown
 from markdown import Extension
 from markdown.blockprocessors import BlockProcessor

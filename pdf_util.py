@@ -1,15 +1,3 @@
->使用的库在更新，下面给出的示例代码可能失效
-## Intro
-
-+ Python处理PDF文件时常用的第三方库：
-	+ `PyPDF2`：用作页面管理
-	+ `pdfplumer`：用作内容管理
-		>前身是`pdfminer`
-
-## PyPDF2
-
-### pdf裁剪
-```python  
 import PyPDF2
 
 
@@ -53,9 +41,8 @@ def select_pdf(pdf: str, select_str: str = "", outputpath: str = None) -> None:
     if outputpath is None:
         outputpath = "".join(pdf.split(".")[:-1]) + "_selected.pdf"
     res_pdf.write(open(outputpath, "wb"))
-```
-### pdf拼接
-```python
+
+
 import PyPDF2
 
 
@@ -74,16 +61,9 @@ def merge_pdfs(pdfs: list[str], outputpath: str = "Result.pdf"):
         for page in pdf_input.pages:
             pdf_output.add_page(page)
     pdf_output.write(open(outputpath, "wb"))
-```
 
-## pdfplumer
-+ 踩坑
-	+ 在win10下，需要安装软件[ImageMagick](https://docs.wand-py.org/en/latest/guide/install.html#install-imagemagick-on-windows)和Ghostscript
-		>神奇的是，这些都能通过scoop下
 
-### pdf转图片
-```python
-import os, pdfplumber
+import os, pdfplumber  # scoop ImageMagick, Ghostscript
 
 
 def pdf_to_imgs(pdfpath: str, distpath: str = os.path.join(".", "imgs")) -> None:
@@ -106,4 +86,3 @@ def pdf_to_imgs(pdfpath: str, distpath: str = os.path.join(".", "imgs")) -> None
         img.save(os.path.join(distpath, str(i) + ".jpg"))
 
     pdf.close()
-```

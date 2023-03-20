@@ -11,7 +11,7 @@ def dcmp(a, b):  # 用于比较两浮点数是否相同(实际上也能比较两
     return -1 if a < b else 1
 
 
-class Point():  # 也同Vetor, 可以理解为二维平面的点, 同样可以用来表示一个向量(该向量起点在远点), 类中重载的运算针对向量
+class Point:  # 也同Vetor, 可以理解为二维平面的点, 同样可以用来表示一个向量(该向量起点在远点), 类中重载的运算针对向量
     def __init__(self, x: float, y: float) -> None:
         self.x = x
         self.y = y
@@ -44,7 +44,10 @@ class Point():  # 也同Vetor, 可以理解为二维平面的点, 同样可以�
         return self / self.len()
 
     def rotate(self, angle):  # 向量逆时针旋转angle度数(弧度)
-        return Point(self.x * cos(angle) + self.y * sin(angle), -self.x * sin(angle) + self.y * cos(angle))
+        return Point(
+            self.x * cos(angle) + self.y * sin(angle),
+            -self.x * sin(angle) + self.y * cos(angle),
+        )
 
     def __str__(self) -> str:
         return "Point({}, {})".format(self.x, self.y)
@@ -138,7 +141,7 @@ def get_line_intersection(p: Point, v: Point, q: Point, w: Point):  # v and w is
     return p + v * t
 
 
-class Line():
+class Line:
     def __init__(self, p: Point, v: Point) -> None:
         self.p = p
         self.v = v
@@ -162,6 +165,7 @@ def get_circle(a: Point, b: Point, c: Point):  # 三点确定一个圆
 
 def get_min_circle_of_points(points):
     from random import shuffle
+
     shuffle(points)
     c = Circle(points[0], 0)
     for i in range(1, len(points)):
@@ -171,8 +175,10 @@ def get_min_circle_of_points(points):
             for j in range(1, i):
                 # if c.r < Point.dist(c.p, points[j]):
                 if dcmp(c.r, Point.dist(c.p, points[j])) < 0:
-                    c = Circle((points[i] + points[j]) / 2,
-                               Point.dist(points[i], points[j]) / 2)
+                    c = Circle(
+                        (points[i] + points[j]) / 2,
+                        Point.dist(points[i], points[j]) / 2,
+                    )
                     for k in range(1, j):
                         # if c.r < Point.dist(c.p, points[k]):
                         if dcmp(c.r, Point.dist(c.p, points[k])) < 0:
@@ -195,7 +201,11 @@ if __name__ == "__main__":
 
         k = 0
         for i in range(1, 4):
-            if dcmp(ans[i].y, ans[k].y) < 0 or dcmp(ans[i].y, ans[k].y) == 0 and dcmp(ans[i].x, ans[k].x) < 0:
+            if (
+                dcmp(ans[i].y, ans[k].y) < 0
+                or dcmp(ans[i].y, ans[k].y) == 0
+                and dcmp(ans[i].x, ans[k].x) < 0
+            ):
                 k = i
 
         print("%.5f" % min_area)
