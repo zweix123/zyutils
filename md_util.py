@@ -1,4 +1,4 @@
-import re
+import re, functools
 
 
 def process_images(content, func):
@@ -29,38 +29,59 @@ def process_images(content, func):
     return re.sub(patten, modify, content)
 
 
-from markdown import markdown
-from markdown import Extension
-from markdown.blockprocessors import BlockProcessor
-import xml.etree.ElementTree as etree
+def get_image_link(content):
+    # 优雅! 太优雅了!
+    return functools.reduce(
+        lambda x, y: x + y,
+        [
+            list(filter(str.strip, re.findall(pattern, content)))
+            for pattern in [r"!\[.*?\]\((.*?)\)", r"<img.*?src=[\'\"](.*?)[\'\"].*?>"]
+        ],
+    )
 
 
-def md_to_html(md: str) -> str:
-    class BoxBlockProcessor(BlockProcessor):
-        first = True
-
-        def run(self, parent, blocks):
-            if self.first:
-                self.first = False
-                e = etree.SubElement(parent, "div")
-                self.parser.parseBlocks(e, blocks)
-                for _ in range(0, len(blocks)):
-                    blocks.pop(0)
-                return True
-            return False
-
-    class BoxExtension(Extension):
-        def extendMarkdown(self, md):
-            md.parser.blockprocessors.register(BoxBlockProcessor(md.parser), "box", 175)
-
-    extensions = [
-        BoxExtension(),
-        "meta",
-        "fenced_code",
-        "codehilite",
-        # "extra",
-        "attr_list",
-        "tables",
-        # "toc",
+def get_not_image_link(content):
+    return [
+        link[1]
+        for link in re.findall(r"\[(.*?)\]\((.*?)\)", content)
+        if not link[1].endswith((".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"))
     ]
-    return markdown(md, extensions=extensions)
+
+    # return list(filter(str.strip, re.findall(r"\[(.*?)\]\((.*?)\)", content)))
+
+
+# from markdown import markdown
+# from markdown import Extension
+# from markdown.blockprocessors import BlockProcessor
+# import xml.etree.ElementTree as etree
+
+
+# def md_to_html(md: str) -> str:
+#     class BoxBlockProcessor(BlockProcessor):
+#         first = True
+
+#         def run(self, parent, blocks):
+#             if self.first:
+#                 self.first = False
+#                 e = etree.SubElement(parent, "div")
+#                 self.parser.parseBlocks(e, blocks)
+#                 for _ in range(0, len(blocks)):
+#                     blocks.pop(0)
+#                 return True
+#             return False
+
+#     class BoxExtension(Extension):
+#         def extendMarkdown(self, md):
+#             md.parser.blockprocessors.register(BoxBlockProcessor(md.parser), "box", 175)
+
+#     extensions = [
+#         BoxExtension(),
+#         "meta",
+#         "fenced_code",
+#         "codehilite",
+#         # "extra",
+#         "attr_list",
+#         "tables",
+#         # "toc",
+#     ]
+#     return markdown(md, extensions=extensions)
