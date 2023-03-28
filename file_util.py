@@ -47,25 +47,25 @@ def get_abspath(basefile: str, filepath: str) -> str:  # 从绝对路径变化�
     return os.path.normpath(os.path.join(os.path.dirname(basefile), filepath))
 
 
-# def get_image_to_target(link: str, from_filepath: str, target_foldpath: str) -> str:
-#     # 对于from_filepath(请使用其绝对地址)中的图床链接link, 它可能是url、绝对地址或相对地址, 我们会get它然后重命名并放到target_foldpath下, 并返回重命名后的名字
-#     # 这里对图片类型的判断是通过link的后缀名, 有些图片的url的末尾不是类型名, 就会有bug
-#     name = uuid.uuid4().hex + "." + link.split(".")[-1]
-#     if str_util.is_url(link):
-#         pass
-#     else:
-#         if os.path.isabs(link) is True:
-#             pass
-#         else:
-#             link = get_abspath(from_filepath, link)
-#             pass
+def get_image_to_target(link: str, from_filepath: str, target_foldpath: str) -> str:
+    # 对于from_filepath(请使用其绝对地址)中的图床链接link, 它可能是url、绝对地址或相对地址, 我们会get它然后重命名并放到target_foldpath下, 并返回重命名后的名字
+    # 这里对图片类型的判断是通过link的后缀名, 有些图片的url的末尾不是类型名, 就会有bug
+    name = uuid.uuid4().hex + "." + link.split(".")[-1]
+    if str_util.is_url(link):
+        pass
+    else:
+        if os.path.isabs(link) is True:
+            pass
+        else:
+            link = get_abspath(from_filepath, link)
+            pass
 
-#     if str_util.is_url(link):
-#         net_util.down_image(link, os.path.join(target_foldpath, name))
-#     else:
-#         if os.path.exists(link) is False:
-#             print("该路径不存在: ", link)
-#             return name
-#         shutil.copyfile(link, os.path.join(target_foldpath, name))
+    if str_util.is_url(link):
+        net_util.down_image(link, os.path.join(target_foldpath, name))
+    else:
+        if os.path.exists(link) is False:
+            print("该路径不存在: ", link)
+            return name
+        shutil.copyfile(link, os.path.join(target_foldpath, name))
 
-#     return name
+    return name

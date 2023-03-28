@@ -1,18 +1,10 @@
+from typing import Any
 from prettytable import PrettyTable
 
 
-def example_vnpy_interface(inter_data):
+def print_table(content: list[list[Any]]):
     table = PrettyTable()
-    table.field_names = ["NAME", "Windows", "Ubuntu", "Mac"]
-
-    for name, systems in inter_data:
-        mp = dict()
-        for system in ["Windows", "Ubuntu", "Mac"]:
-            if system in systems:
-                mp[system] = "\u2713"
-            else:
-                mp[system] = ""
-
-        table.add_row([name] + [v for k, v in mp.items()])
-
+    table.field_names = content[0]
+    for row in content[1:]:
+        table.add_row(row)
     print(table)

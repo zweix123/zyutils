@@ -47,41 +47,39 @@ def get_not_image_link(content):
         if not link[1].endswith((".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"))
     ]
 
-    # return list(filter(str.strip, re.findall(r"\[(.*?)\]\((.*?)\)", content)))
+
+from markdown import markdown
+from markdown import Extension
+from markdown.blockprocessors import BlockProcessor
+import xml.etree.ElementTree as etree
 
 
-# from markdown import markdown
-# from markdown import Extension
-# from markdown.blockprocessors import BlockProcessor
-# import xml.etree.ElementTree as etree
+def md_to_html(md: str) -> str:
+    class BoxBlockProcessor(BlockProcessor):
+        first = True
 
+        def run(self, parent, blocks):
+            if self.first:
+                self.first = False
+                e = etree.SubElement(parent, "div")
+                self.parser.parseBlocks(e, blocks)
+                for _ in range(0, len(blocks)):
+                    blocks.pop(0)
+                return True
+            return False
 
-# def md_to_html(md: str) -> str:
-#     class BoxBlockProcessor(BlockProcessor):
-#         first = True
+    class BoxExtension(Extension):
+        def extendMarkdown(self, md):
+            md.parser.blockprocessors.register(BoxBlockProcessor(md.parser), "box", 175)
 
-#         def run(self, parent, blocks):
-#             if self.first:
-#                 self.first = False
-#                 e = etree.SubElement(parent, "div")
-#                 self.parser.parseBlocks(e, blocks)
-#                 for _ in range(0, len(blocks)):
-#                     blocks.pop(0)
-#                 return True
-#             return False
-
-#     class BoxExtension(Extension):
-#         def extendMarkdown(self, md):
-#             md.parser.blockprocessors.register(BoxBlockProcessor(md.parser), "box", 175)
-
-#     extensions = [
-#         BoxExtension(),
-#         "meta",
-#         "fenced_code",
-#         "codehilite",
-#         # "extra",
-#         "attr_list",
-#         "tables",
-#         # "toc",
-#     ]
-#     return markdown(md, extensions=extensions)
+    extensions = [
+        BoxExtension(),
+        "meta",
+        "fenced_code",
+        "codehilite",
+        # "extra",
+        "attr_list",
+        "tables",
+        # "toc",
+    ]
+    return markdown(md, extensions=extensions)

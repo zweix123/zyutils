@@ -43,9 +43,6 @@ def select_pdf(pdf: str, select_str: str = "", outputpath: str = None) -> None:
     res_pdf.write(open(outputpath, "wb"))
 
 
-import PyPDF2
-
-
 def merge_pdfs(pdfs: list[str], outputpath: str = "Result.pdf"):
     """合并多个pdf文件
 

@@ -44,13 +44,13 @@ def get_page_acwing_problem(index: int, save=False):
 
 
 def get_ele_from_page(page, tag, attrs):
-    bs = BeautifulSoup(page, "lxml")
+    bs = BeautifulSoup(page, "html.parser")
     res = bs.find(tag, attrs=attrs)
     return res
 
 
 def get_eles_from_page(page, tag, attrs):
-    bs = BeautifulSoup(page, "lxml")
+    bs = BeautifulSoup(page, "html.parser")
     res = bs.find_all(tag, attrs=attrs)
     return res
 
@@ -66,7 +66,7 @@ ans = 0
 for i in tqdm(range(1, int(maxn) + 1), desc="Processing"):
     page = get_page_acwing_problem(i)
 
-    bs = BeautifulSoup(page, "lxml")
+    bs = BeautifulSoup(page, "html.parser")
     tmp = bs.find("table", attrs={"class": "table table-striped table-responsive"})
     if tmp is None:
         break

@@ -41,19 +41,19 @@ class UrlFilter:
                     await coroutine
 
 
-# import requests
-# from fake_useragent import UserAgent
+import requests
+from fake_useragent import UserAgent
 
 
-# def get_resp(url):  # 爬虫
-#     # ua池
-#     user_anent = UserAgent().random  # ua池
-#     headers = {"User-Agent": user_anent}
+def get_resp(url):  # 爬虫
+    # ua池
+    user_anent = UserAgent().random  # ua池
+    headers = {"User-Agent": user_anent}
 
-#     # ip池
+    # ip池
 
-#     # 开始爬取
-#     resp = requests.get(url=url, headers=headers)
-#     resp.encoding = resp.apparent_encoding  # 设置编码
+    # 开始爬取
+    resp = requests.get(url=url, headers=headers)
+    resp.encoding = resp.apparent_encoding  # 设置编码
 
-#     return resp
+    return resp
