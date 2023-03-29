@@ -1,4 +1,4 @@
-import re
+import os, re
 from urllib.parse import urlparse
 
 
@@ -22,5 +22,4 @@ def is_url(string):
 
 # 分辨URL和路径: 判断一个字符串是否为路径
 def is_path(string):
-    result = urlparse(string)
-    return not all([result.scheme, result.netloc])
+    return os.path.isdir(string) or os.path.isfile(string)

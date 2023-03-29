@@ -1,4 +1,6 @@
+import os
 import PyPDF2
+import pdfplumber  # scoop ImageMagick, Ghostscript
 
 
 def select_pdf(pdf: str, select_str: str = "", outputpath: str = None) -> None:
@@ -58,9 +60,6 @@ def merge_pdfs(pdfs: list[str], outputpath: str = "Result.pdf"):
         for page in pdf_input.pages:
             pdf_output.add_page(page)
     pdf_output.write(open(outputpath, "wb"))
-
-
-import os, pdfplumber  # scoop ImageMagick, Ghostscript
 
 
 def pdf_to_imgs(pdfpath: str, distpath: str = os.path.join(".", "imgs")) -> None:

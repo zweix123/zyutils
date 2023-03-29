@@ -1,6 +1,23 @@
+import requests
+from fake_useragent import UserAgent
+
 import asyncio
 import aiohttp
 from tqdm.asyncio import tqdm
+
+
+def get_resp(url):  # 爬虫
+    # ua池
+    user_anent = UserAgent().random  # ua池
+    headers = {"User-Agent": user_anent}
+
+    # ip池
+
+    # 开始爬取
+    resp = requests.get(url=url, headers=headers)
+    resp.encoding = resp.apparent_encoding  # 设置编码
+
+    return resp
 
 
 class UrlFilter:
@@ -25,9 +42,9 @@ class UrlFilter:
             self.invalid_urls.append(url)
 
     async def check_urls(self):
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299"
-        }
+        user_anent = UserAgent().random
+        headers = {"User-Agent": user_anent}
+
         async with aiohttp.ClientSession(headers=headers) as session:
             tasks = []
             n = len(self.urls)
@@ -39,21 +56,3 @@ class UrlFilter:
                     tasks.append(task)
                 for coroutine in asyncio.as_completed(tasks):
                     await coroutine
-
-
-import requests
-from fake_useragent import UserAgent
-
-
-def get_resp(url):  # 爬虫
-    # ua池
-    user_anent = UserAgent().random  # ua池
-    headers = {"User-Agent": user_anent}
-
-    # ip池
-
-    # 开始爬取
-    resp = requests.get(url=url, headers=headers)
-    resp.encoding = resp.apparent_encoding  # 设置编码
-
-    return resp

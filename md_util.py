@@ -1,12 +1,16 @@
 import re, functools
+from typing import Callable
 
 
-def process_images(content, func):
-    """处理Markdown类型字符串中的图片链接, 返回处理过图片链接部分的Markdown字符串
+def process_images(content: str, func: Callable[[str], str]) -> str:
+    """处理内容为Markdown的字符串中的图片链接, 返回处理过的字符串
 
     Args:
-        content (_type_): Markdown类型字符串
-        func (_type_): 处理图片链接的函数, 该函数接受图片链接, 返回一个有关图片链接的新串
+        content (str): 处理内容为Markdown的字符串
+        func (Callable[[str], str]): 处理图片链接的函数, 该函数接受图片链接字符串, 返回一个字符串
+
+    Returns:
+        str: _description_
     """
 
     def modify(match):
@@ -22,15 +26,15 @@ def process_images(content, func):
             pre, suf = tar.split(mid)
 
         link = mid
-        # 黑盒魔法结束
-        return pre + func(link) + suf
+        # 黑盒魔法结束, link即为一个图片链接
+        return pre + func(link) + suf  # 这里不能修改
 
     patten = r"!\[.*?\]\((.*?)\)|<img.*?src=[\'\"](.*?)[\'\"].*?>"
     return re.sub(patten, modify, content)
 
 
-def get_image_link(content):
-    # 优雅! 太优雅了!
+def get_image_link(content: str) -> list[str]:
+    # 优雅! 函数式编程太优雅了!
     return functools.reduce(
         lambda x, y: x + y,
         [
@@ -40,46 +44,11 @@ def get_image_link(content):
     )
 
 
-def get_not_image_link(content):
+def get_not_image_link(content: str) -> list[str]:
     return [
         link[1]
         for link in re.findall(r"\[(.*?)\]\((.*?)\)", content)
-        if not link[1].endswith((".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"))
+        if not link[1].endswith(
+            (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp")
+        )  # 一方面, 这里可能不全, 另一方面, 有的图片链接并不以后缀名区分, 所以这个函数是有bug的
     ]
-
-
-from markdown import markdown
-from markdown import Extension
-from markdown.blockprocessors import BlockProcessor
-import xml.etree.ElementTree as etree
-
-
-def md_to_html(md: str) -> str:
-    class BoxBlockProcessor(BlockProcessor):
-        first = True
-
-        def run(self, parent, blocks):
-            if self.first:
-                self.first = False
-                e = etree.SubElement(parent, "div")
-                self.parser.parseBlocks(e, blocks)
-                for _ in range(0, len(blocks)):
-                    blocks.pop(0)
-                return True
-            return False
-
-    class BoxExtension(Extension):
-        def extendMarkdown(self, md):
-            md.parser.blockprocessors.register(BoxBlockProcessor(md.parser), "box", 175)
-
-    extensions = [
-        BoxExtension(),
-        "meta",
-        "fenced_code",
-        "codehilite",
-        # "extra",
-        "attr_list",
-        "tables",
-        # "toc",
-    ]
-    return markdown(md, extensions=extensions)

@@ -1,5 +1,6 @@
 """
 请一定要完成`A + B`, 我按这个判断header对不对的, 早发现早治疗
+找到题库页面, 打开F12的network, 刷新页面找到problem的信息, 右键它找到copy
 cookie和header用这个网址生成`https://curlconverter.com/`
 代码主要是网页解析
 """
@@ -8,26 +9,27 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 
 cookies = {
-    "csrftoken": "RyW98KUri9J4Dbw1RFInBdg1nC0P4QOQWLLaaZXcMwQCAln72ChucBNIxe1J0UOC",
-    "sessionid": "j5dywqvx71hs1kudz0pdvcw7eeunkxuz",
+    "csrftoken": "2eDR1yFE7RA1VQhJ90eoipCLuqQClaErtrgY0JKyjIb1308mMSt6rDBLnMtAthOA",
+    "sessionid": "x2soy6vlka5kd85i54fakc3ytmjetn6g",
+    "file_305565_readed": '""',
 }
 
 headers = {
-    "Connection": "keep-alive",
-    "Pragma": "no-cache",
-    "Cache-Control": "no-cache",
-    "sec-ch-ua": '" Not A;Brand";v="99", "Chromium";v="8"',
-    "sec-ch-ua-mobile": "?0",
-    "Upgrade-Insecure-Requests": "1",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36 SLBrowser/8.0.0.12022 SLBChan/11",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "Sec-Fetch-Site": "same-origin",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-User": "?1",
-    "Sec-Fetch-Dest": "document",
-    "Referer": "https://www.acwing.com/",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
     "Accept-Language": "zh-CN,zh;q=0.9",
-    # 'Cookie': 'csrftoken=RyW98KUri9J4Dbw1RFInBdg1nC0P4QOQWLLaaZXcMwQCAln72ChucBNIxe1J0UOC; sessionid=j5dywqvx71hs1kudz0pdvcw7eeunkxuz',
+    "Cache-Control": "max-age=0",
+    "Connection": "keep-alive",
+    # 'Cookie': 'csrftoken=2eDR1yFE7RA1VQhJ90eoipCLuqQClaErtrgY0JKyjIb1308mMSt6rDBLnMtAthOA; sessionid=x2soy6vlka5kd85i54fakc3ytmjetn6g; file_305565_readed=""',
+    "Referer": "https://www.acwing.com/about/",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "same-origin",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+    "sec-ch-ua": '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"Windows"',
 }
 
 
