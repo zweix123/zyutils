@@ -53,11 +53,9 @@ sys.path.append(abspath(dirname(dirname(__file__))))
 
 #
 
-import file_util, str_util, md_util
+import util.file_util as file_util, util.str_util as str_util, util.md_util as md_util
 
 #
-
-import os
 
 from tqdm import tqdm
 from prettytable import PrettyTable
@@ -104,35 +102,29 @@ class UrlChecker:
                     await coroutine
 
 
+def not_should_filtered(s: str):
+    if s.startswith("#") is True:
+        return False
+    return True
+
+
 def check():
-    inter = list()
-    print("提取所有图片链接")
+    targets = list()
+    print("提取链接:")
     for filepath in tqdm(file_util.get_files_under_folder(DIRPATH, "md")):
-        temp = md_util.get_image_link(file_util.read(filepath))
-        inter += list(zip([filepath] * len(temp), temp))
+        temp = md_util.get_not_image_link(file_util.read(filepath))
+        temp = [sam for sam in temp if str_util.is_url(sam)]
+        # temp = [sam for sam in temp if not_should_filtered(sam)]
+        targets += list(zip([filepath] * len(temp), temp))
 
-    urlpairs, pathpairs = [list()] * 2
-    for temp in inter:
-        if str_util.is_path(temp[1]):
-            pathpairs.append(temp)
-        else:
-            urlpairs.append(temp)
+    # print(targets)
+    invalid_urlpairs = list()
 
-    invalid_urlpairs, invalid_pathpairs = [list()] * 2
+    print("检测链接:")
+    urlchecker = UrlChecker(targets)
+    invalid_urlpairs += urlchecker()
 
-    if len(urlpairs) != 0:
-        print("检测URL")
-
-        urlchecker = UrlChecker(urlpairs)
-        invalid_urlpairs += urlchecker()
-
-    if len(pathpairs) != 0:
-        print("检测所有Path")
-        for pathpair in tqdm(pathpairs):
-            if os.path.exists(pathpair[1]) is False:
-                invalid_pathpairs.append(pathpair)
-
-    ans = invalid_urlpairs + invalid_pathpairs
+    ans = invalid_urlpairs
 
     if len(ans) != 0:
         table = PrettyTable()

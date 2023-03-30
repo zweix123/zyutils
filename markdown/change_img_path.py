@@ -53,7 +53,7 @@ sys.path.append(abspath(dirname(dirname(__file__))))
 
 #
 
-import file_util
+import util.file_util as file_util
 
 #
 

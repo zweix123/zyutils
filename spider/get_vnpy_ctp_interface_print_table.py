@@ -5,7 +5,7 @@ sys.path.append(abspath(dirname(dirname(__file__))))
 
 ##
 
-import net_util
+import util.net_util as net_util
 
 resp = net_util.get_resp("https://www.vnpy.com/docs/cn/gateway.html")
 
@@ -54,6 +54,6 @@ table
 
 ##
 
-import show_util
+import util.show_util as show_util
 
 show_util.print_table(table)
