@@ -1,61 +1,22 @@
+if True:
+    import os, sys
+
+    sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
+    from util import file_util
+
 DIRPATH = r"/home/netease/Documents/CS-notes"  # 要处理的Markdown项目根目录的绝对路径
-URLP = "https://cdn.jsdelivr.net/gh/zweix123/CS-notes@master/resource"  # 项目使用图床的URL前缀
-MODE = "note"  # 模式有["note", "blog", "OSS"], 具体解释见下
 
-
-import os
 
 if DIRPATH[-1] != os.sep:
     DIRPATH += os.sep
 
-if URLP[-1] != "/":
-    URLP += "/"
+if DIRPATH is None or DIRPATH == "":
+    print("请填写项目所在文件路径")
+    exit()
+if os.path.exists(DIRPATH) is False:
+    print("项目目录不存在")
+    exit()
 
-DIRNAME = DIRPATH.split(os.sep)[-2]
-
-IMGPATHPRE = URLP.split(os.sep)[-2]
-
-
-def check_cnt():
-    if DIRPATH is None or DIRPATH == "":
-        print("请填写项目所在文件路径")
-        return False
-    if os.path.exists(DIRPATH) is False:
-        print("项目目录不存在")
-        return False
-    return True
-
-
-def check_perl():
-    if check_cnt() is False:
-        return False
-    if URLP is None or URLP == "":
-        print("请填写图床前缀")
-        return False
-    if MODE not in ["note", "blog", "OSS"]:
-        print("请查看图床路径前缀是否填写或填写是否正确")
-        return False
-    return True
-
-
-def check():
-    return check_cnt() and check_perl()
-
-
-check()
-
-#
-
-import sys
-from os.path import abspath, dirname
-
-sys.path.append(abspath(dirname(dirname(__file__))))
-
-#
-
-import util.file_util as file_util
-
-#
 
 import string
 from tqdm import tqdm
@@ -86,6 +47,7 @@ def cnt():
     count_en, count_zh, count_dg, count_pu = 0, 0, 0, 0
 
     for file in tqdm(filenames):
+        # for file in filenames:
         with open(file, encoding=file_util.get_file_code(file)) as f:
             for line in f:
                 t = count_content(line)
@@ -94,16 +56,15 @@ def cnt():
                 count_dg += t[2]
                 count_pu += t[3]
 
-    print("总共{}篇文章".format(len(filenames)))
-    print("英文:", f"{int(count_en):,d}")
-    print("中文:", f"{int(count_zh):,d}")
-    print("数字:", f"{int(count_dg):,d}")
-    print("标点:", f"{int(count_pu):,d}")
+    print(f"总共{len(filenames)}篇文章")
+    print(f"字母:{int(count_en):,d}个")
+    print(f"汉字:{int(count_zh):,d}字")
+    print(f"数字:{int(count_dg):,d}位")
+    print(f"标点:{int(count_pu):,d}个")
     print(
-        "汇总:",
-        f"{int(count_zh + count_en // 6 + count_dg // 32):,d}",
-        "(使用算法认为每6个字母是单词、每32个数字是一个字)",
+        f"总共大约:{int(count_zh + count_en//6 + count_dg//32):,d}字",
     )
 
 
-cnt()
+if __name__ == "__main__":
+    cnt()
