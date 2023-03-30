@@ -60,7 +60,8 @@ import util.file_util as file_util, util.md_util as md_util
 import os
 
 
-import shutil, urllib
+import shutil
+from urllib.parse import unquote
 from tqdm import tqdm
 
 
@@ -76,7 +77,7 @@ def clean():
         if img_link.startswith(URLP)  # 相当于只处理图床管理的图片
     ]
 
-    valid_imgs_path = list(map(urllib.parse.unquote, valid_imgs_path))
+    valid_imgs_path = list(map(unquote, valid_imgs_path))
 
     imgs_path = map(
         lambda path: path[len(DIRPATH) :],

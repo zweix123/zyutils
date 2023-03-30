@@ -34,4 +34,5 @@ def img_col_reverse_co(imgpath):
 
     cv2.imshow("img", img)
     cv2.imshow("dst", dist)
+    
     cv2.waitKey(0)

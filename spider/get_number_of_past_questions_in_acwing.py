@@ -1,6 +1,6 @@
 """
 请一定要完成`A + B`, 我按这个判断header对不对的, 早发现早治疗
-找到题库页面, 打开F12的network, 刷新页面找到problem的信息, 右键它找到copy
+找到题库页面, 打开F12的network, 刷新页面找到problem的信息, 右键它 找到 然后copy
 cookie和header用这个网址生成`https://curlconverter.com/`
 代码主要是网页解析
 """

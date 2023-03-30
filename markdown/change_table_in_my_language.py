@@ -117,3 +117,6 @@ def table():
     files = file_util.get_files_under_folder(DIRPATH, "md")
     for file in tqdm(files):
         process(file)
+
+
+table()

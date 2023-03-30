@@ -51,4 +51,5 @@ if __name__ == "__main__":
     make_rectangle(rectangle)
     make_circle(circle)
 
-    plt.show()
+    # plt.show()
+    plt.savefig("result.png")

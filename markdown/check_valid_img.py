@@ -77,8 +77,9 @@ class UrlChecker:
         return self.invalid_urlpairs
 
     async def check_urlpair(self, pair, session, pbar):
+        timeout = aiohttp.ClientTimeout(total=5)
         try:
-            async with session.get(pair[1]) as response:
+            async with session.get(pair[1], timeout=timeout) as response:
                 pbar.update(1)
                 if response.status == 200:
                     pass
@@ -89,7 +90,9 @@ class UrlChecker:
 
     async def check_urlpairs(self):
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299",
+            "Referer": "https://www.example.com",
+            "Accept-Language": "en-US,en;q=0.9",
         }
         async with aiohttp.ClientSession(headers=headers) as session:
             tasks = []
