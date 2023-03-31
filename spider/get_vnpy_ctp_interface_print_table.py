@@ -1,3 +1,5 @@
+from typing import Dict
+
 import sys
 from os.path import abspath, dirname
 
@@ -41,7 +43,7 @@ table.append(["NAME", "Windows", "Ubuntu", "Mac"])
 
 
 for name, systems in inter_data:
-    mp = dict()
+    mp = {}
     for system in ["Windows", "Ubuntu", "Mac"]:
         if system in systems:
             mp[system] = "\u2713"

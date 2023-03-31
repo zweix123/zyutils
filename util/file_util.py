@@ -1,7 +1,7 @@
 import os, chardet, shutil, uuid
+from typing import Optional
 
-
-def get_files_under_folder(folerpath: str, suffix_name: str = None) -> list[str]:
+def get_files_under_folder(folerpath: str, suffix_name: Optional[str] = None) -> list[str]:
     """返回目录folderpath下后缀名为suffix_name的所有文件的绝对路径列表"""
     return [
         os.path.abspath(os.path.join(dirpath, filename))

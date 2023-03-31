@@ -1,48 +1,18 @@
 DIRPATH = r"/home/netease/Documents/CS-notes"  # 要处理的Markdown项目根目录的绝对路径
-URLP = "https://cdn.jsdelivr.net/gh/zweix123/CS-notes@master/resource"  # 项目使用图床的URL前缀
-MODE = "note"  # 模式有["note", "blog", "OSS"], 具体解释见下
-
 
 import os
 
 if DIRPATH[-1] != os.sep:
     DIRPATH += os.sep
-
-if URLP[-1] != "/":
-    URLP += "/"
-
 DIRNAME = DIRPATH.split(os.sep)[-2]
 
-IMGPATHPRE = URLP.split(os.sep)[-2]
 
-
-def check_cnt():
-    if DIRPATH is None or DIRPATH == "":
-        print("请填写项目所在文件路径")
-        return False
-    if os.path.exists(DIRPATH) is False:
-        print("项目目录不存在")
-        return False
-    return True
-
-
-def check_perl():
-    if check_cnt() is False:
-        return False
-    if URLP is None or URLP == "":
-        print("请填写图床前缀")
-        return False
-    if MODE not in ["note", "blog", "OSS"]:
-        print("请查看图床路径前缀是否填写或填写是否正确")
-        return False
-    return True
-
-
-def check():
-    return check_cnt() and check_perl()
-
-
-check()
+if DIRPATH is None or DIRPATH == "":
+    print("请填写项目所在文件路径")
+    exit()
+if os.path.exists(DIRPATH) is False:
+    print("项目目录不存在")
+    exit()
 
 #
 
@@ -53,12 +23,13 @@ sys.path.append(abspath(dirname(dirname(__file__))))
 
 #
 
-import util.file_util as file_util, util.str_util as str_util, util.md_util as md_util
+from util import file_util, str_util, md_util
 
 #
 
 from tqdm import tqdm
 from prettytable import PrettyTable
+from typing import List, Tuple
 
 import asyncio
 import aiohttp
@@ -66,9 +37,9 @@ from tqdm.asyncio import tqdm
 
 
 class UrlChecker:
-    def __init__(self, urlpairs: list[(str, str)]) -> None:
+    def __init__(self, urlpairs: List[Tuple[str, str]]) -> None:
         self.urlpairs = urlpairs
-        self.invalid_urlpairs = list()
+        self.invalid_urlpairs: list[str] = list()
 
     def __call__(self) -> list[str]:
         asyncio.run(self.check_urlpairs())

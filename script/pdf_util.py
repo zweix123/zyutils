@@ -1,9 +1,10 @@
 import os
 import PyPDF2
 import pdfplumber  # scoop ImageMagick, Ghostscript
+from typing import Optional
 
 
-def select_pdf(pdf: str, select_str: str = "", outputpath: str = None) -> None:
+def select_pdf(pdf: str, select_str: str = "", outputpath: Optional[str] = None) -> None:
     """切分pdf文件, 具体的, 通过选择表达式选择想要的PDF页面
     选择表达式:
         1: 选择第一页

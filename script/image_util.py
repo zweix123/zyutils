@@ -1,10 +1,11 @@
 import cv2  # python3 -m pip install opencv-python
+from typing import Tuple
 
 
 def cat(
     imgpath: str,
-    height_range: tuple(int, int),
-    weight_range: tuple(int, int),
+    height_range: Tuple[int, int],
+    weight_range: Tuple[int, int],
     distimgpath: str,
 ) -> None:
     img = cv2.imread(imgpath)
@@ -34,5 +35,5 @@ def img_col_reverse_co(imgpath):
 
     cv2.imshow("img", img)
     cv2.imshow("dst", dist)
-    
+
     cv2.waitKey(0)
