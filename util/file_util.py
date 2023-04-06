@@ -1,7 +1,10 @@
-import os, chardet, shutil, uuid
-from typing import Optional
+import os, json, chardet, shutil, uuid
+from typing import Optional, Any
 
-def get_files_under_folder(folerpath: str, suffix_name: Optional[str] = None) -> list[str]:
+
+def get_files_under_folder(
+    folerpath: str, suffix_name: Optional[str] = None
+) -> list[str]:
     """返回目录folderpath下后缀名为suffix_name的所有文件的绝对路径列表"""
     return [
         os.path.abspath(os.path.join(dirpath, filename))
@@ -11,9 +14,9 @@ def get_files_under_folder(folerpath: str, suffix_name: Optional[str] = None) ->
     ]
 
 
-def get_file_code(filepath: str) -> str:
+def get_file_code(filepath: str) -> Optional[str]:
     """检测文件编码格式, 效率较低"""
-    res = str()
+    res: Optional[str] = str()
     with open(filepath, "rb") as f:
         res = chardet.detect(f.read())["encoding"]
     return res
@@ -28,13 +31,18 @@ def read(filepath: str) -> str:  # 读取文本文件内容
         raise Exception("The path {} is not exists".format(filepath))
 
 
-def write(filepath: str, data: str) -> None:  # 向文件(覆)写内容
-    if os.path.exists(filepath) is False:
-        with open(filepath, "w") as f:
+def write(filepath: str, data: Any) -> None:  # 向文件(覆)写内容(性能极低)
+    with open(
+        file=filepath,
+        mode="w",
+        encoding=get_file_code(filepath) if os.path.exists(filepath) is True else None,
+    ) as f:
+        if isinstance(data, str):
             f.write(data)
-    else:
-        with open(filepath, "w", encoding=get_file_code(filepath)) as f:
-            f.write(data)
+        elif isinstance(data, dict):
+            f.write(json.dumps(data))
+        else:
+            raise TypeError("Unsupported data type")
 
 
 def mkdir(folder_path):
