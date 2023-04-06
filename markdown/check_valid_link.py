@@ -83,6 +83,7 @@ def not_should_filtered(s: str):
 
 
 def check():
+    print(DIRNAME)
     targets = list()
     print("提取链接:")
     for filepath in tqdm(file_util.get_files_under_folder(DIRPATH, "md")):
@@ -110,4 +111,6 @@ def check():
         print("没有失效图床链接")
 
 
-check()
+if __name__ == "__main__":
+    # print(DIRNAME)
+    check()

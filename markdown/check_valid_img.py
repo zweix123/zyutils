@@ -79,6 +79,7 @@ class UrlChecker:
 
 
 def check():
+    print(DIRNAME)
     inter = list()
     print("提取所有图片链接")
     for filepath in tqdm(file_util.get_files_under_folder(DIRPATH, "md")):
@@ -89,21 +90,28 @@ def check():
     for temp in inter:
         if str_util.is_path(temp[1]):
             pathpairs.append(temp)
-        else:
+        if str_util.is_url(temp[1]):
             urlpairs.append(temp)
 
     invalid_urlpairs, invalid_pathpairs = [list()] * 2
 
     if len(urlpairs) != 0:
         print("检测URL")
-
         urlchecker = UrlChecker(urlpairs)
         invalid_urlpairs += urlchecker()
 
     if len(pathpairs) != 0:
         print("检测所有Path")
         for pathpair in tqdm(pathpairs):
-            if os.path.exists(pathpair[1]) is False:
+            img_file_path = os.path.normpath(
+                os.path.join(
+                    os.path.abspath(
+                        os.path.join(DIRNAME, os.path.dirname(pathpair[0]))
+                    ),
+                    pathpair[1],
+                )
+            )
+            if os.path.exists(img_file_path) is False:
                 invalid_pathpairs.append(pathpair)
 
     ans = invalid_urlpairs + invalid_pathpairs
@@ -118,4 +126,5 @@ def check():
         print("没有失效图床链接")
 
 
-check()
+if __name__ == "__main__":
+    check()
