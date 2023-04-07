@@ -1,64 +1,8 @@
-DIRPATH = r"/home/netease/Documents/CS-notes"  # 要处理的Markdown项目根目录的绝对路径
-URLP = "https://cdn.jsdelivr.net/gh/zweix123/CS-notes@master/resource"  # 项目使用图床的URL前缀
-MODE = "note"  # 模式有["note", "blog", "OSS"], 具体解释见下
-
-
-import os
-
-if DIRPATH[-1] != os.sep:
-    DIRPATH += os.sep
-
-if URLP[-1] != "/":
-    URLP += "/"
-
-DIRNAME = DIRPATH.split(os.sep)[-2]
-
-IMGPATHPRE = URLP.split(os.sep)[-2]
-
-
-def check_cnt():
-    if DIRPATH is None or DIRPATH == "":
-        print("请填写项目所在文件路径")
-        return False
-    if os.path.exists(DIRPATH) is False:
-        print("项目目录不存在")
-        return False
-    return True
-
-
-def check_perl():
-    if check_cnt() is False:
-        return False
-    if URLP is None or URLP == "":
-        print("请填写图床前缀")
-        return False
-    if MODE not in ["note", "blog", "OSS"]:
-        print("请查看图床路径前缀是否填写或填写是否正确")
-        return False
-    return True
-
-
-def check():
-    return check_cnt() and check_perl()
-
-
-check()
-
-#
-
-import sys
-from os.path import abspath, dirname
-
-sys.path.append(abspath(dirname(dirname(__file__))))
-
-#
-
-import util.file_util as file_util
-
-#
+from settings import *
 
 import re
-from tqdm import tqdm
+from rich.progress import track
+from util import file_util
 
 
 def clear(filepath):
@@ -115,8 +59,9 @@ def process(filepath):
 
 def table():
     files = file_util.get_files_under_folder(DIRPATH, "md")
-    for file in tqdm(files):
+    for file in track(files):
         process(file)
 
 
-table()
+if __name__ == "__main__":
+    table()

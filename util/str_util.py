@@ -1,5 +1,4 @@
 import os, re
-from urllib.parse import urlparse
 
 
 # 分辨URL和路径: 判断一个字符串是否为URL

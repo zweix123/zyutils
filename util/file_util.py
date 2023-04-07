@@ -2,7 +2,7 @@ import os, json, chardet, shutil, uuid
 from typing import Optional, Any
 
 
-def get_files_under_folder(
+def get_filepaths_under_folder(
     folerpath: str, suffix_name: Optional[str] = None
 ) -> list[str]:
     """返回目录folderpath下后缀名为suffix_name的所有文件的绝对路径列表"""
@@ -31,7 +31,7 @@ def read(filepath: str) -> str:  # 读取文本文件内容
         raise Exception("The path {} is not exists".format(filepath))
 
 
-def write(filepath: str, data: Any) -> None:  # 向文件(覆)写内容(性能极低)
+def write(filepath: str, data: Any) -> None:  # 向文件(覆)写内容(性能极低, 能区分文本文件和json文件)
     with open(
         file=filepath,
         mode="w",
@@ -45,7 +45,7 @@ def write(filepath: str, data: Any) -> None:  # 向文件(覆)写内容(性能�
             raise TypeError("Unsupported data type")
 
 
-def mkdir(folder_path):
+def mkdir(folder_path):  # 加一个预检防止覆盖
     if os.path.exists(folder_path) is False:
         os.mkdir(folder_path)
 
@@ -70,7 +70,7 @@ def get_image_to_target(link: str, from_filepath: str, target_foldpath: str) -> 
             pass
 
     if str_util.is_url(link):
-        net_util.down_image(link, os.path.join(target_foldpath, name))
+        net_util.down(link, os.path.join(target_foldpath, name))
     else:
         if os.path.exists(link) is False:
             print("该路径不存在: ", link)

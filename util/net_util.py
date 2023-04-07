@@ -1,9 +1,9 @@
-import requests
-from fake_useragent import UserAgent
-
 import asyncio
 import aiohttp
-from tqdm.asyncio import tqdm
+import requests
+from fake_useragent import UserAgent
+from rich.progress import Progress
+from typing import Any, Tuple
 
 
 def get_resp(url):  # 爬虫
@@ -20,39 +20,68 @@ def get_resp(url):  # 爬虫
     return resp
 
 
-class UrlFilter:
-    def __init__(self, urls: list[str]) -> None:
-        self.urls = urls
-        self.valid_urls = list()
-        self.invalid_urls = list()
+def down(url: str, filepath: str):
+    result = get_resp(url)
+    with open(filepath, "wb") as f:
+        f.write(result.content)
 
-    def __call__(self) -> list[str]:
+
+class Event:
+    def __init__(self, url: str, data: Any) -> None:
+        self.url = url
+        self.is_valid = True
+        self.data = data
+
+    def __str__(self) -> str:
+        return self.url + ", " + str(self.data)
+
+
+class URLChecker:
+    def __init__(self, data: list[Event]) -> None:
+        self.data = data
+
+    def __call__(self) -> list[Event]:
         asyncio.run(self.check_urls())
-        return self.valid_urls, self.invalid_urls
 
-    async def check_url(self, url, session, pbar):
+        return self.data
+
+    async def check_url(self, index: int, session, progress, task_id):
         try:
-            async with session.get(url) as response:
-                pbar.update(1)
+            async with session.get(self.data[index].url) as response:
                 if response.status == 200:
-                    self.valid_urls.append(url)
+                    self.data[index].is_valid = True
                 else:
-                    self.invalid_urls.append(url)
+                    self.data[index].is_valid = False
+            progress.update(task_id, advance=1)
         except:
-            self.invalid_urls.append(url)
+            self.data[index].is_valid = False
+            progress.update(task_id, advance=1)
 
     async def check_urls(self):
-        user_anent = UserAgent().random
-        headers = {"User-Agent": user_anent}
+        headers = {"User-Agent": UserAgent().random}
 
         async with aiohttp.ClientSession(headers=headers) as session:
             tasks = []
-            n = len(self.urls)
-            with tqdm(total=n) as pbar:
+            n = len(self.data)
+            with Progress() as progress:
+                task_id = progress.add_task("Check URLs...", total=n)
                 for i in range(n):
                     task = asyncio.create_task(
-                        self.check_url(self.urls[i], session, pbar)
+                        self.check_url(i, session, progress, task_id)
                     )
                     tasks.append(task)
                 for coroutine in asyncio.as_completed(tasks):
                     await coroutine
+
+
+def check_url_link_path_pairs_return_invalid(
+    urls: list[str], paths: list[str]
+) -> Tuple[list[str], list[str]]:
+    assert len(urls) == len(paths), "提供的urls和paths应该成对"
+    pairs: list[Event] = list()
+    for url, path in zip(urls, paths):
+        pairs.append(Event(url, path))
+
+    inter = URLChecker(pairs)()
+
+    return ([event.url for event in inter], [event.data for event in inter])

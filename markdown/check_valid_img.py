@@ -1,108 +1,30 @@
-DIRPATH = r"/home/netease/Documents/CS-notes"  # 要处理的Markdown项目根目录的绝对路径
+from settings import *
 
 import os
-
-if DIRPATH[-1] != os.sep:
-    DIRPATH += os.sep
-
-DIRNAME = DIRPATH.split(os.sep)[-2]
-
-if DIRPATH is None or DIRPATH == "":
-    print("请填写项目所在文件路径")
-    exit()
-if os.path.exists(DIRPATH) is False:
-    print("项目目录不存在")
-    exit()
-
-#
-
-import sys
-from os.path import abspath, dirname
-
-sys.path.append(abspath(dirname(dirname(__file__))))
-
-#
-
-from util import file_util, str_util, md_util
-
-#
-
-import os
-
-from tqdm import tqdm
-from prettytable import PrettyTable
-from typing import List, Tuple
-
-import asyncio
-import aiohttp
-from tqdm.asyncio import tqdm
-
-
-class UrlChecker:
-    def __init__(self, urlpairs: List[Tuple[str, str]]) -> None:
-        self.urlpairs = urlpairs
-        self.invalid_urlpairs: List[str] = list()
-
-    def __call__(self) -> list[str]:
-        asyncio.run(self.check_urlpairs())
-        return self.invalid_urlpairs
-
-    async def check_urlpair(self, pair, session, pbar):
-        timeout = aiohttp.ClientTimeout(total=5)
-        try:
-            async with session.get(pair[1], timeout=timeout) as response:
-                pbar.update(1)
-                if response.status == 200:
-                    pass
-                else:
-                    self.invalid_urlpairs.append(pair)
-        except:
-            self.invalid_urlpairs.append(pair)
-
-    async def check_urlpairs(self):
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299",
-            "Referer": "https://www.example.com",
-            "Accept-Language": "en-US,en;q=0.9",
-        }
-        async with aiohttp.ClientSession(headers=headers) as session:
-            tasks = []
-            n = len(self.urlpairs)
-            with tqdm(total=n) as pbar:
-                for i in range(n):
-                    task = asyncio.create_task(
-                        self.check_urlpair(self.urlpairs[i], session, pbar)
-                    )
-                    tasks.append(task)
-                for coroutine in asyncio.as_completed(tasks):
-                    await coroutine
+from rich.progress import track
+from util import net_util, file_util, md_util, str_util, rich_util
 
 
 def check():
-    print(DIRNAME)
-    inter = list()
-    print("提取所有图片链接")
-    for filepath in tqdm(file_util.get_files_under_folder(DIRPATH, "md")):
-        temp = md_util.get_image_link(file_util.read(filepath))
-        inter += list(zip([filepath] * len(temp), temp))
+    url_events: list[net_util.Event] = list()
+    path_pairs: list(tuple(str, str)) = list()
 
-    urlpairs, pathpairs = [list()] * 2
-    for temp in inter:
-        if str_util.is_path(temp[1]):
-            pathpairs.append(temp)
-        if str_util.is_url(temp[1]):
-            urlpairs.append(temp)
+    for filepath in track(
+        file_util.get_filepaths_under_folder(DIRPATH, "md"), description="提取图片链接"
+    ):
+        for link in md_util.get_image_link(file_util.read(filepath)):
+            if str_util.is_url(link):
+                url_events.append(net_util.Event(url=link, data=filepath))
+            else:
+                path_pairs.append((link, filepath))
 
-    invalid_urlpairs, invalid_pathpairs = [list()] * 2
+    ans: list(tuple(str, str)) = list()
 
-    if len(urlpairs) != 0:
-        print("检测URL")
-        urlchecker = UrlChecker(urlpairs)
-        invalid_urlpairs += urlchecker()
+    if len(url_events) != 0:
+        ans += [(event.url, event.data) for event in net_util.URLChecker(url_events)()]
 
-    if len(pathpairs) != 0:
-        print("检测所有Path")
-        for pathpair in tqdm(pathpairs):
+    if len(path_pairs) != 0:
+        for pathpair in track(path_pairs, description="Check Path: "):
             img_file_path = os.path.normpath(
                 os.path.join(
                     os.path.abspath(
@@ -112,16 +34,14 @@ def check():
                 )
             )
             if os.path.exists(img_file_path) is False:
-                invalid_pathpairs.append(pathpair)
-
-    ans = invalid_urlpairs + invalid_pathpairs
+                ans.append(pathpair)
 
     if len(ans) != 0:
-        table = PrettyTable()
-        table.field_names = ["文件", "链接"]
+        table = list()
+        table.append(["链接", "文件"])
         for sam in ans:
-            table.add_row([sam[0][len(DIRPATH) :], sam[1]])
-        print(table)
+            table.append(list(sam))
+        rich_util.print_table(table)
     else:
         print("没有失效图床链接")
 

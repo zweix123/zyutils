@@ -1,24 +1,14 @@
-from typing import Dict
+import os, sys
 
-import sys
-from os.path import abspath, dirname
+sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
-sys.path.append(abspath(dirname(dirname(__file__))))
+import re
+from bs4 import BeautifulSoup
+from util import net_util, rich_util
 
-##
-
-import util.net_util as net_util
 
 resp = net_util.get_resp("https://www.vnpy.com/docs/cn/gateway.html")
-
-##
-
-text = resp.text
-
-from bs4 import BeautifulSoup
-import re
-
-soup = BeautifulSoup(text, "html.parser")
+soup = BeautifulSoup(resp.text, "html.parser")
 root = soup.find("div", attrs={"class": "section", "id": "id8"})
 targets = root.find_all("div", attrs={"class": "section"})
 res = list()
@@ -27,23 +17,18 @@ for target in targets:
         continue
     name = target.find("h3").text[:-1]
 
-    system = [t.text for t in target.find("div").find("li").find_all("li")]
-    sorted(system)
+    systems = [t.text for t in target.find("div").find("li").find_all("li")]
+    sorted(systems)
 
-    res.append((name, system))
-
-res
-
-##
+    res.append((name, systems))
 
 inter_data = res
 
 table = list()
 table.append(["NAME", "Windows", "Ubuntu", "Mac"])
 
-
 for name, systems in inter_data:
-    mp = {}
+    mp = dict()
     for system in ["Windows", "Ubuntu", "Mac"]:
         if system in systems:
             mp[system] = "\u2713"
@@ -52,10 +37,4 @@ for name, systems in inter_data:
 
     table.append([name] + [v for k, v in mp.items()])
 
-table
-
-##
-
-import util.show_util as show_util
-
-show_util.print_table(table)
+rich_util.print_table(table)

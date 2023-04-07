@@ -45,9 +45,7 @@ class RSA(Exception):
         if len(str_msg) != 0:
             raise Exception(str_msg)
 
-        self.secrect_key_d, sam1, sam2 = self.exgcd(
-            self.secrect_key_e, self.secret_key_phi
-        )
+        self.secrect_key_d, _, _ = self.exgcd(self.secrect_key_e, self.secret_key_phi)
         self.secrect_key_d = (
             self.secrect_key_d + self.secret_key_phi
         ) % self.secret_key_phi
@@ -65,8 +63,7 @@ class RSA(Exception):
 
 
 if __name__ == "__main__":
-    sam = RSA(3, 11, 3)
-    print(sam)
-    print(sam.e_(11))
-    print(sam.d_(16))
-    print("zweix")
+    rsa = RSA(3, 11, 3)
+    print(rsa)
+    print(rsa.e_(11))
+    print(rsa.d_(16))

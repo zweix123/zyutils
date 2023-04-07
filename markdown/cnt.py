@@ -1,24 +1,8 @@
-DIRPATH = r"/home/netease/Documents/CS-notes/"  # Markdown项目根目录绝对路径
-ZYUTILS = r"/home/netease/Projects/zyutils/"  # zyutils的绝对路径
+from settings import *
 
-
-try:
-    import sys
-
-    sys.path.append(ZYUTILS)
-    import util.file_util as file_util, util.md_util as md_util
-except ImportError as ierr:
-    print("zyutils的绝对路径不正确")
-    exit(0)
-
-
-import os, sys, string
+import string
 from rich.progress import track
-
-
-def check_config():
-    assert os.path.exists(DIRPATH) is True, "Markdwon项目路径不存在"
-    assert DIRPATH[-1] == os.sep, "Markdwon项目路径不以" + os.sep + "结尾"
+from util import file_util
 
 
 def count_content(content):
@@ -41,8 +25,6 @@ def count_content(content):
 
 
 def cnt():
-    check_config()
-
     filenames = file_util.get_files_under_folder(DIRPATH, "md")
 
     count_en, count_zh, count_dg, count_pu = 0, 0, 0, 0
