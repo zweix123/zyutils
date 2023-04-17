@@ -68,8 +68,8 @@ def get_convex_by_andrew(points):  # 利用andres算法求出点集points的凸�
     vis = [False] * len(points)
 
     for i, point in enumerate(points):
-        while top >= 2 and area(points[st[top - 2]], points[st[top - 1]], point) <= 0:
-            if area(points[st[top - 2]], points[st[top - 1]], point) < 0:
+        while top >= 2 and (temp := area(points[st[top - 2]], points[st[top - 1]], point)) <= 0:
+            if temp < 0:
                 top = top - 1
                 vis[st[top]] = False
             else:

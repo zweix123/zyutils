@@ -31,14 +31,7 @@ class RSA(Exception):
         self.secret_key_phi = (self.prime_p - 1) * (self.prime_q - 1)
 
         if math.gcd(self.secret_key_phi, secret_key_e) != 1:
-            str_msg = (
-                str_msg
-                + "公开指数e("
-                + str(secret_key_e)
-                + ")和\phi{n} = "
-                + str(self.secret_key_phi)
-                + "不是互为素数"
-            )
+            str_msg = f"{str_msg}公开指数e({secret_key_e})和\phi{{n}} = {self.secret_key_phi}不是互为素数"
 
         self.secrect_key_e = secret_key_e
 
@@ -46,14 +39,10 @@ class RSA(Exception):
             raise Exception(str_msg)
 
         self.secrect_key_d, _, _ = self.exgcd(self.secrect_key_e, self.secret_key_phi)
-        self.secrect_key_d = (
-            self.secrect_key_d + self.secret_key_phi
-        ) % self.secret_key_phi
+        self.secrect_key_d = (self.secrect_key_d + self.secret_key_phi) % self.secret_key_phi  # fmt: skip
 
     def __str__(self):
-        return "该RSA系统的公钥为(n = {}, e = {}), 私钥为(d = {})".format(
-            self.secret_key_n, self.secrect_key_e, self.secrect_key_d
-        )
+        return f"该RSA系统的公钥为(n = {self.secret_key_n}, e = {self.secrect_key_e}), 私钥为(d = {self.secrect_key_d})"
 
     def e_(self, num):
         return num**self.secrect_key_e % self.secret_key_n

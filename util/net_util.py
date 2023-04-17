@@ -45,7 +45,9 @@ class URLChecker:
 
         return self.data
 
-    async def check_url(self, index: int, session, progress, task_id):
+    async def check_url(
+        self, index: int, session: aiohttp.ClientSession, progress, task_id
+    ):
         try:
             async with session.get(self.data[index].url) as response:
                 if response.status == 200:
@@ -58,20 +60,15 @@ class URLChecker:
             progress.update(task_id, advance=1)
 
     async def check_urls(self):
-        headers = {"User-Agent": UserAgent().random}
-
-        async with aiohttp.ClientSession(headers=headers) as session:
-            tasks = []
-            n = len(self.data)
+        async with aiohttp.ClientSession(
+            headers={"User-Agent": UserAgent().random}
+        ) as session:
             with Progress() as progress:
-                task_id = progress.add_task("Check URLs...", total=n)
-                for i in range(n):
-                    task = asyncio.create_task(
-                        self.check_url(i, session, progress, task_id)
-                    )
-                    tasks.append(task)
-                for coroutine in asyncio.as_completed(tasks):
-                    await coroutine
+                task_id = progress.add_task("Check URLs...", total := len(self.data))
+                for i in range(total):
+                    await self.check_url(
+                        i, session, progress, task_id
+                    ) | progress.update(task_id, advance=1)
 
 
 def check_url_link_path_pairs_return_invalid(

@@ -7,9 +7,7 @@ from util import file_util
 
 def clear(filepath):
     content = file_util.read(filepath)
-    pattern = re.compile(
-        r"<!-- toc\.first -->\n(.*?\n)*?.*?\n<!-- toc\.second -->", re.S
-    )
+    pattern = re.compile(r"<!-- toc\.first -->\n(.*?\n)*?.*?\n<!-- toc\.second -->", re.S)  # fmt: skip
     content = re.sub(pattern, "[TOC]", content)
     file_util.write(filepath, content)
 
@@ -22,13 +20,8 @@ def get_menu(filename):
 
     minn = 6 + 1
 
-    headers = []
-    for match in matches:
-        level = len(match[0])
-        text = match[1]
-        headers.append([level, text])
-        if level < minn:
-            minn = level
+    headers = [[len(match[0]), match[1]] for match in matches]
+    minn = min([level for level, _ in headers])
 
     for i in range(len(headers)):
         headers[i][0] -= minn - 1
