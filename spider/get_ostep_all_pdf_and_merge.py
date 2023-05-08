@@ -1,36 +1,39 @@
-homepage = "https://pages.cs.wisc.edu/~remzi/OSTEP/"
-homepage_tmpfilepath = "page.html"  # 后续会变化
-tmpfilepath = ".tmp"
-result_filepath = "ostep.pdf"
+homepage_url = "https://pages.cs.wisc.edu/~remzi/OSTEP/"
+result_filename = "ostep.pdf"
 
+
+import __init__
 
 import os
 import shutil
 import PyPDF2
-import requests
 from typing import List
 from bs4 import BeautifulSoup, Tag
+from rich.progress import track
+from util import net_util
 
 
-def end():
+tmpfilepath = ".zmp"
+homepage_tmpfilepath = "page.html"  # 后续会变化
+
+
+def pre_code():
+    if os.path.exists(result_filename) is True:
+        suf_code()
+        exit()
+    global tmpfilepath, homepage_tmpfilepath
+    if not os.path.exists(tmpfilepath):
+        os.mkdir(tmpfilepath)
+    homepage_tmpfilepath = os.path.join(tmpfilepath, homepage_tmpfilepath)
+
+
+def suf_code():
     if os.path.exists(tmpfilepath):
         shutil.rmtree(tmpfilepath)
 
 
-def pre():
-    if os.path.exists(result_filepath) is True:
-        end()
-        exit()
-    global tmpfilepath, homepage_tmpfilepath
-
-    if not os.path.exists(tmpfilepath):
-        os.mkdir(tmpfilepath)
-
-    homepage_tmpfilepath = os.path.join(tmpfilepath, homepage_tmpfilepath)
-
-
-pre()
-pdf_file_path_s: List[str] = list()
+pre_code()
+tmp_pdf_file_path_s: List[str] = list()
 
 
 def get_html_code() -> str:
@@ -38,7 +41,7 @@ def get_html_code() -> str:
         with open(homepage_tmpfilepath, "r") as f:
             return f.read()
     else:
-        response = requests.get(homepage)
+        response = net_util.get_resp(homepage_url)
         with open(homepage_tmpfilepath, "wb") as f:
             f.write(response.content)
         return response.text
@@ -62,15 +65,15 @@ def g_load():
 
     def load(cell: Tag):
         nonlocal num
-        global pdf_file_path_s
+        global tmp_pdf_file_path_s
         num = num + 1
         if (tag := cell.find("a")) is not None:
-            url: str = homepage + tag["href"]
+            url: str = homepage_url + tag["href"]
             filepath = os.path.join(".", tmpfilepath, str(num) + url.split("/")[-1])
-            pdf_file_path_s.append(filepath)
+            tmp_pdf_file_path_s.append(filepath)
             if os.path.exists(filepath) is False:
                 print(f"下载{filepath}")
-                response = requests.get(url)
+                response = net_util.get_resp(url)
                 with open(filepath, "wb") as f:
                     f.write(response.content)
 
@@ -79,23 +82,21 @@ def g_load():
 
 loader = g_load()
 
-for row in new_table:
-    for cell in row:
-        loader(cell)
+tasks = [cell for row in new_table for cell in row]
+for task in track(tasks, description="正在下载..."):
+    loader(task)
 
-print("下载完毕")
-# 下载完毕
+#
 
 pdf_output = PyPDF2.PdfWriter()
-for pdf in pdf_file_path_s:
+for pdf in track(tmp_pdf_file_path_s, description="正在合成..."):
     print("处理:{}".format(pdf), end=" ")
     pdf_input = PyPDF2.PdfReader(open(pdf, "rb"))
     print("共{}页".format(len(pdf_input.pages)))
     for page in pdf_input.pages:
         pdf_output.add_page(page)
-pdf_output.write(open(result_filepath, "wb"))
-
+pdf_output.write(open(result_filename, "wb"))
 
 #
 
-end()
+suf_code()

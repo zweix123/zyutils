@@ -1,7 +1,4 @@
-import os, sys
-
-sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
-
+import __init__
 import re
 from bs4 import BeautifulSoup
 from util import net_util, rich_util
