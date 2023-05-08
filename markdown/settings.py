@@ -1,8 +1,8 @@
 import os, sys
 
-ZYTUILS = r"C:\Users\zweix\Projects\zyutils"  # zyutils项目的根目录的绝对路径
+ZYTUILS = r"/home/netease/Projects/zyutils"  # zyutils项目的根目录的绝对路径
 
-DIRPATH = r"C:\Users\zweix\Documents\CS-notes"  # 要处理的Markdown项目根目录的绝对路径
+DIRPATH = r"/home/netease/Documents/CS-notes"  # 要处理的Markdown项目根目录的绝对路径
 URLP = "https://cdn.jsdelivr.net/gh/zweix123/CS-notes@master/resource"  # 项目使用图床的URL前缀
 MODE = "note"  # 模式有["note", "blog", "OSS"], 具体解释见下
 
@@ -73,11 +73,5 @@ DIRNAME = DIRPATH.split(os.sep)[-2]  # 拿到Markdown项目根目录目录名
 IMGPATHPRE = URLP.split("/")[-2]  # 拿到图床根目录目录名
 
 sys.path.append(ZYTUILS)
-
-# test const
-# for var_name in dir():
-#     if not var_name.startswith("__"):
-#         var_value = getattr(sys.modules[__name__], var_name)
-#         print(f"{var_name} = {var_value}")
 
 del os, sys

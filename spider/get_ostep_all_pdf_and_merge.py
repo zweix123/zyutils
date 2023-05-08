@@ -8,7 +8,6 @@ import os
 import shutil
 import PyPDF2
 import requests
-import pandas as pd
 from typing import List
 from bs4 import BeautifulSoup, Tag
 

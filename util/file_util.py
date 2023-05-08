@@ -2,7 +2,7 @@ import os, json, chardet, shutil, uuid
 from typing import Optional, Any
 
 
-def get_filepaths_under_folder(
+def get_filepaths_under_dir(
     folerpath: str, suffix_name: Optional[str] = None
 ) -> list[str]:
     """返回目录folderpath下后缀名为suffix_name的所有文件的绝对路径列表"""
@@ -14,7 +14,7 @@ def get_filepaths_under_folder(
     ]
 
 
-def get_file_code(filepath: str) -> Optional[str]:
+def get_file_encode(filepath: str) -> Optional[str]:
     """检测文件编码格式, 效率较低"""
     res: Optional[str] = str()
     with open(filepath, "rb") as f:
@@ -24,7 +24,7 @@ def get_file_code(filepath: str) -> Optional[str]:
 
 def read(filepath: str) -> str:  # 读取文本文件内容
     if os.path.exists(filepath):
-        with open(filepath, "r", encoding=get_file_code(filepath)) as f:
+        with open(filepath, "r", encoding=get_file_encode(filepath)) as f:
             content = f.read()
             return content
     else:
@@ -35,7 +35,9 @@ def write(filepath: str, data: Any) -> None:  # 向文件(覆)写内容(性能�
     with open(
         file=filepath,
         mode="w",
-        encoding=get_file_code(filepath) if os.path.exists(filepath) is True else None,
+        encoding=get_file_encode(filepath)
+        if os.path.exists(filepath) is True
+        else None,
     ) as f:
         if isinstance(data, str):
             f.write(data)
@@ -60,15 +62,8 @@ def get_image_to_target(link: str, from_filepath: str, target_foldpath: str) -> 
     # 对于from_filepath(请使用其绝对地址)中的图床链接link, 它可能是url、绝对地址或相对地址, 我们会get它然后重命名并放到target_foldpath下, 并返回重命名后的名字
     # 这里对图片类型的判断是通过link的后缀名, 有些图片的url的末尾不是类型名, 就会有bug
     name = uuid.uuid4().hex + "." + link.split(".")[-1]
-    if str_util.is_url(link):
-        pass
-    else:
-        if os.path.isabs(link) is True:
-            pass
-        else:
-            link = get_abspath(from_filepath, link)
-            pass
-
+    if str_util.is_path(link) and not os.path.isabs(link):
+        link = get_abspath(from_filepath, link)
     if str_util.is_url(link):
         net_util.down(link, os.path.join(target_foldpath, name))
     else:

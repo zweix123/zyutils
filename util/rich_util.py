@@ -1,9 +1,9 @@
 from typing import Optional
-from rich import print, inspect
+from rich import print as rprint, inspect as rinspect
 
 
+# 以表格的形式打印一个矩形list, 默认第一行是表头
 def print_table(data: list[list[str]] = list(), title: Optional[str] = None):
-    # 以表格的形式打印一个矩形列表, 默认第一行是表头
     from rich.console import Console
     from rich.table import Table
 

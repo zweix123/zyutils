@@ -37,9 +37,9 @@ def clean():
             tar = os.path.join(DIRPATH, img_path)
             shutil.move(tar, trash_can)
             flag = True
-    
+
     if flag is False:
-        os.removedirs(trash_can)    
+        os.removedirs(trash_can)
 
 
 if __name__ == "__main__":

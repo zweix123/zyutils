@@ -24,13 +24,13 @@ def count_content(content):
     return cnt_en, cnt_zh, cnt_dg, cnt_pu
 
 
-def cnt():
-    filenames = file_util.get_files_under_folder(DIRPATH, "md")
+def count():
+    filenames = file_util.get_filepaths_under_dir(DIRPATH, "md")
 
     count_en, count_zh, count_dg, count_pu = 0, 0, 0, 0
 
     for file in track(filenames):
-        with open(file, encoding=file_util.get_file_code(file)) as f:
+        with open(file, encoding=file_util.get_file_encode(file)) as f:
             for line in f:
                 t = count_content(line)
                 count_en += t[0]
@@ -47,4 +47,4 @@ def cnt():
 
 
 if __name__ == "__main__":
-    cnt()
+    count()
