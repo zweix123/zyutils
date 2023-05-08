@@ -1,27 +1,18 @@
-from json import loads
-import asyncio
-import aiohttp
+import platform
 import requests
 from fake_useragent import UserAgent
-from rich.progress import Progress
-from typing import Any, Tuple, Callable, Optional, Union, Literal, Coroutine
-
-import platform
-
-
-from types import TracebackType, coroutine
 from threading import Thread
 from asyncio import (
+    run as asyncio_run,
     get_running_loop,
     new_event_loop,
     set_event_loop,
     run_coroutine_threadsafe,
     AbstractEventLoop,
-    Future,
 )
-
 from aiohttp import ClientSession, ClientResponse
-
+from rich.progress import Progress
+from typing import Any, Tuple, Callable, Optional, Union, Literal, Coroutine
 
 if platform.system() == "Windows":
     # from asyncio import set_event_loop_policy, WindowsSelectorEventLoopPolicy
@@ -29,14 +20,11 @@ if platform.system() == "Windows":
     pass
 
 
-CALLBACK_TYPE = Callable[[], Any]
-
-
 class Request:
     def __init__(
         self,
         method: Literal["GET", "POST"],
-        endpoint: str,
+        url: str,
         params: Optional[dict] = None,
         data: Optional[dict] = None,
         headers: Optional[dict] = None,
@@ -44,7 +32,7 @@ class Request:
         response: Optional["Response"] = None,
     ) -> None:
         self.method: Literal["GET", "POST"] = method
-        self.endpoint: str = endpoint
+        self.url: str = url
         self.params: Optional[dict] = params
         self.data: Optional[dict] = data
         self.headers: Optional[dict] = headers
@@ -57,36 +45,22 @@ class Request:
 
 
 class Response:
-    def __init__(self, status: int, **kwargs) -> None:
-        self.status = status
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-        if hasattr(self, "text"):
-            self.data = loads(self.text)
+    def __init__(self, status: int, headers, data: Any) -> None:
+        self.status: int = status
+        self.headers: str = headers
+        self.data = data
 
 
-class Rail:
-    def __init__(self) -> None:
-        self.session: ClientSession = ClientSession(trust_env=True)
-        self.loop: AbstractEventLoop
-
-    def start(self):
-        try:
-            self.loop = get_running_loop()
-        except:
-            self.loop = new_event_loop()
-        Rail.start_event_loop(self.loop)
-
-    def stop(self):
-        if self.loop is not None and self.loop.is_running():
-            self.loop.stop()
+class Rail(object):
+    def __init__(self):
+        self.session: ClientSession = None
+        self.loop: AbstractEventLoop = None
 
     @staticmethod
     def start_event_loop(loop: AbstractEventLoop) -> None:
         if not loop.is_running():
             thread = Thread(target=Rail.run_event_loop, args=(loop,))
-            thread.daemon = True  # 守护进程、自动停止
+            thread.daemon = True
             thread.start()
 
     @staticmethod
@@ -94,50 +68,37 @@ class Rail:
         set_event_loop(loop)
         loop.run_forever()
 
-    async def _get_response(self, request: Request) -> Response:
-        if not self.session:
-            self.session = ClientSession(trust_env=True)
-
-        cr: ClientResponse = await self.session.request(
-            request.method,
-            request.endpoint,
-            headers=request.headers,
-            params=request.params,
-            data=request.data,
-        )
-
-        status = cr.status
-        text: str = await cr.text()
-
-        request.response = Response(status, text=text)
-        return request.response
-
-    async def _process_request(self, request: Request) -> None:
+    def start(self, session_number: int = 3) -> None:
         try:
-            response: Response = await self._get_response(request)
-            status_code: int = response.status
+            self.loop = get_running_loop()
+        except RuntimeError:
+            self.loop = new_event_loop()
+        Rail.start_event_loop(self.loop)
 
-            if status_code // 100 == 2:  # 2xx成功
-                if request.callback and callable(request.callback):
-                    request.callback(response)
-                else:
-                    raise Exception("G")
-            else:
-                raise Exception("G")
-        except Exception as e:
-            raise Exception("G")
+    def stop(self) -> None:
+        if self.loop and self.loop.is_running():
+            self.loop.stop()
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
+
+    def join(self) -> None:
+        pass
 
     def add_request(
         self,
         method: Literal["GET", "POST"],
-        endpoint: str,
+        url: str,
         params: Optional[dict] = None,
         data: Optional[dict] = None,
         headers: Optional[dict] = None,
         callback: Optional[Callable[["Response"], None]] = None,
     ) -> Request:
-        # 异步request
-        request: Request = Request(method, endpoint, params, data, headers, callback)
+        request: Request = Request(method, url, params, data, headers, callback)
         coro: Coroutine = self._process_request(request)
         run_coroutine_threadsafe(coro, self.loop)
         return request
@@ -145,17 +106,54 @@ class Rail:
     def request(
         self,
         method: Literal["GET", "POST"],
-        endpoint: str,
+        url: str,
         params: Optional[dict] = None,
         data: Optional[dict] = None,
         headers: Optional[dict] = None,
-        callback: Optional[Callable[["Response"], None]] = None,
     ) -> Response:
-        # 同步request
-        request: Request = Request(method, endpoint, params, data, headers, callback)
+        request: Request = Request(method, url, params, data, headers)
         coro: Coroutine = self._get_response(request)
         fut = run_coroutine_threadsafe(coro, self.loop)
         return fut.result()
+
+    async def _get_response(self, request: Request) -> Response:
+        if not self.session:
+            self.session = ClientSession(trust_env=True)
+
+        cr: ClientResponse = await self.session.request(
+            request.method,
+            request.url,
+            headers=request.headers,
+            params=request.params,
+            data=request.data,
+        )
+
+        status = cr.status
+        headers = cr.headers
+        data = None
+        if "application/json" in cr.headers.get("Content-Type", ""):
+            data = await cr.json()
+        else:
+            data = await cr.text()
+
+        request.response = Response(status, headers=headers, data=data)
+
+        return request.response
+
+    async def _process_request(self, request: Request) -> None:
+        try:
+            response: Response = await self._get_response(request)
+            status: int = response.status
+
+            if status // 100 == 2:
+                if request.callback is not None:
+                    request.callback(response)
+                else:
+                    raise Exception("无回调函数")
+            else:
+                raise Exception("请求失败")
+        except Exception as e:
+            raise e
 
 
 def get_resp(url):  # 爬虫
@@ -193,13 +191,11 @@ class URLChecker:
         self.data = data
 
     def __call__(self) -> list[Event]:
-        asyncio.run(self.check_urls())
+        asyncio_run(self.check_urls())
 
         return self.data
 
-    async def check_url(
-        self, index: int, session: aiohttp.ClientSession, progress, task_id
-    ):
+    async def check_url(self, index: int, session: ClientSession, progress, task_id):
         try:
             async with session.get(self.data[index].url) as response:
                 if response.status == 200:
@@ -212,9 +208,7 @@ class URLChecker:
             progress.update(task_id, advance=1)
 
     async def check_urls(self):
-        async with aiohttp.ClientSession(
-            headers={"User-Agent": UserAgent().random}
-        ) as session:
+        async with ClientSession(headers={"User-Agent": UserAgent().random}) as session:
             with Progress() as progress:
                 task_id = progress.add_task("Check URLs...", total := len(self.data))
                 for i in range(total):
