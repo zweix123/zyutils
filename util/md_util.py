@@ -3,6 +3,16 @@ from typing import Callable
 
 
 def process_images(content: str, func: Callable[[str], str]) -> str:
+    """提取一份Markdown格式的文本中的所有图片链接, 通过提供的处理函数进行转换并嵌入回原文本中  
+       可用于切换图床
+
+    Args:
+        content (str): Mardown文本
+        func (Callable[[str], str]): 处理每个图片链接的函数, 返回转换后的图片
+
+    Returns:
+        str: 返回处理好(修改图片链接)的Markdown文本
+    """
     pattern = r"!\[.*?\]\((.*?)\)|<img.*?src=[\'\"](.*?)[\'\"].*?>"
 
     def modify(match):

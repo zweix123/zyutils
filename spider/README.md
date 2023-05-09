@@ -1,2 +1,1 @@
-+ `get_number_of_past_questions_in_acwing.py`计算你在acwing平台的做题总数, 用法在代码注释中
-+ `get_ostep_all_pdf_and_merge.py`爬取ostep的各个章节并拼接起来
+个人写的爬虫，每个文件的文件名可指示它的作用，代码内有充足的注释。
