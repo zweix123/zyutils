@@ -1,7 +1,7 @@
 Python是一门极好的语言，可惜国内目前对Python的岗位需求不大，我个人仍将其放在一个辅助性的位置。
 
 我个人使用Python主要在以下几个方面
-+ 脚本：[jyyslide-md](https://github.com/zweix123/jyyslide-md)、博客管理工具
++ 脚本：[jyyslide-md](https://github.com/zweix123/jyyslide-md)、博客管理工具、爬虫脚本
 + 纯Web应用：
 + 量化交易系统：中低频交易，摸索中
 
@@ -18,7 +18,7 @@ Python是一门极好的语言，可惜国内目前对Python的岗位需求不�
 ├── cli     # 上面提到的命令行项目的框架设计
 ├── md      # 博客管理相关脚本
 ├── misc    # 杂项, 目前都是一些计算相关代码
-├── script  # 脚本
+├── script  # 未分类脚本
 ├── spider  # 爬虫
-└── util    # 自己常用的库
+└── util    # 自用封装库
 ```

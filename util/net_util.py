@@ -1,25 +1,28 @@
-import platform
+import time
 import requests
-from fake_useragent import UserAgent
+import platform
 from threading import Thread
 from asyncio import (
-    run as asyncio_run,
     get_running_loop,
     new_event_loop,
     set_event_loop,
     run_coroutine_threadsafe,
+    all_tasks,
     AbstractEventLoop,
 )
 from aiohttp import ClientSession, ClientResponse
-from rich.progress import Progress
-from typing import Any, Tuple, Callable, Optional, Union, Literal, Coroutine
+from dataclasses import dataclass
+from typing import Any, Union, Optional, Literal, Callable, Coroutine
 
 if platform.system() == "Windows":
-    # from asyncio import set_event_loop_policy, WindowsSelectorEventLoopPolicy
-    # set_event_loop_policy(WindowsSelectorEventLoopPolicy())
-    pass
+    from asyncio import set_event_loop_policy, WindowsSelectorEventLoopPolicy  # type: ignore
+
+    set_event_loop_policy(WindowsSelectorEventLoopPolicy())
+
+from fake_useragent import UserAgent
 
 
+@dataclass
 class Request:
     def __init__(
         self,
@@ -28,7 +31,8 @@ class Request:
         params: Optional[dict] = None,
         data: Optional[dict] = None,
         headers: Optional[dict] = None,
-        callback: Optional[Callable[["Response"], None]] = None,
+        callback: Optional[Callable[["Response", Any], None]] = None,
+        extra: Any = None,  # 回调函数使用
         response: Optional["Response"] = None,
     ) -> None:
         self.method: Literal["GET", "POST"] = method
@@ -36,25 +40,32 @@ class Request:
         self.params: Optional[dict] = params
         self.data: Optional[dict] = data
         self.headers: Optional[dict] = headers
-        self.callback: Optional[Callable[["Response"], None]] = callback
+        self.callback: Optional[Callable[["Response", Any], None]] = callback
+        self.extra = extra
         self.response: Optional["Response"] = response
 
-        if self.headers is None:
-            user_anent = UserAgent().random
-            headers = {"User-Agent": user_anent}
+    def __str__(self) -> str:
+        return "{} {} is {}\nparams {}\nheaders{}".format(
+            self.method,
+            self.url,
+            self.response.status if self.response is not None else "terminal",
+            self.params,
+            self.headers,
+        )
 
 
+@dataclass
 class Response:
     def __init__(self, status: int, headers, data: Any) -> None:
         self.status: int = status
         self.headers: str = headers
-        self.data = data
+        self.data: str | dict | bytes = data
 
 
 class Rail(object):
-    def __init__(self):
-        self.session: ClientSession = None
-        self.loop: AbstractEventLoop = None
+    def __init__(self: "Rail"):
+        self.session: ClientSession = None  # type: ignore
+        self.loop: AbstractEventLoop = None  # type: ignore
 
     @staticmethod
     def start_event_loop(loop: AbstractEventLoop) -> None:
@@ -68,6 +79,9 @@ class Rail(object):
         set_event_loop(loop)
         loop.run_forever()
 
+    async def close(self):
+        await self.session.close()
+
     def start(self, session_number: int = 3) -> None:
         try:
             self.loop = get_running_loop()
@@ -76,6 +90,11 @@ class Rail(object):
         Rail.start_event_loop(self.loop)
 
     def stop(self) -> None:
+        if self.session is not None:
+            coro: Coroutine = self.close()
+            fut = run_coroutine_threadsafe(coro, self.loop)
+            fut.result()
+
         if self.loop and self.loop.is_running():
             self.loop.stop()
 
@@ -87,34 +106,28 @@ class Rail(object):
         self.stop()
 
     def join(self) -> None:
-        pass
+        while len(all_tasks(loop=self.loop)) != 0:
+            time.sleep(1)
 
-    def add_request(
-        self,
-        method: Literal["GET", "POST"],
-        url: str,
-        params: Optional[dict] = None,
-        data: Optional[dict] = None,
-        headers: Optional[dict] = None,
-        callback: Optional[Callable[["Response"], None]] = None,
-    ) -> Request:
-        request: Request = Request(method, url, params, data, headers, callback)
+    def add_request(self, request: Request) -> Request:
         coro: Coroutine = self._process_request(request)
         run_coroutine_threadsafe(coro, self.loop)
         return request
 
-    def request(
-        self,
-        method: Literal["GET", "POST"],
-        url: str,
-        params: Optional[dict] = None,
-        data: Optional[dict] = None,
-        headers: Optional[dict] = None,
-    ) -> Response:
-        request: Request = Request(method, url, params, data, headers)
+    def request(self, request: Request) -> Response:
         coro: Coroutine = self._get_response(request)
         fut = run_coroutine_threadsafe(coro, self.loop)
         return fut.result()
+
+    @staticmethod
+    async def _parse_response(response: ClientResponse) -> Union[dict, str, bytes]:
+        content_type = response.headers.get("Content-Type", "")
+        if "application/json" in content_type:
+            return await response.json()
+        elif "text" in content_type:
+            return await response.text()
+        else:
+            return await response.read()
 
     async def _get_response(self, request: Request) -> Response:
         if not self.session:
@@ -130,30 +143,49 @@ class Rail(object):
 
         status = cr.status
         headers = cr.headers
-        data = None
-        if "application/json" in cr.headers.get("Content-Type", ""):
-            data = await cr.json()
-        else:
-            data = await cr.text()
+        data = await Rail._parse_response(cr)
 
         request.response = Response(status, headers=headers, data=data)
-
         return request.response
 
     async def _process_request(self, request: Request) -> None:
         try:
             response: Response = await self._get_response(request)
             status: int = response.status
-
             if status // 100 == 2:
                 if request.callback is not None:
-                    request.callback(response)
+                    request.callback(response, request.extra)
                 else:
                     raise Exception("无回调函数")
             else:
-                raise Exception("请求失败")
+                raise Exception("请求异常, 无法回调")
         except Exception as e:
             raise e
+
+
+class RailGun(Rail):
+    def __init__(self):
+        super().__init__()
+
+    def start(self, session_number: int = 3) -> None:
+        super().start(session_number)
+
+    def stop(self) -> None:
+        super().stop()
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
+
+    def join(self) -> None:
+        super().join()
+
+    def fire(self, method: Literal["GET", "POST"], url: str) -> Response:
+        request = Request(method, url)
+        return self.request(request)
 
 
 def get_resp(url):  # 爬虫
@@ -176,6 +208,7 @@ def down(url: str, filepath: str):
         f.write(result.content)
 
 
+"""
 class Event:
     def __init__(self, url: str, data: Any) -> None:
         self.url = url
@@ -228,3 +261,4 @@ def check_url_link_path_pairs_return_invalid(
     inter = URLChecker(pairs)()
 
     return ([event.url for event in inter], [event.data for event in inter])
+"""

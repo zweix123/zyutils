@@ -1,17 +1,20 @@
-import os, json, chardet, shutil, uuid
-from typing import Optional, Any
+import os, json, csv, chardet, shutil, uuid
+from typing import Optional, Any, Literal
 
 
 def get_filepaths_under_dir(
     folerpath: str, suffix_name: Optional[str] = None
 ) -> list[str]:
     """返回目录folderpath下后缀名为suffix_name的所有文件的绝对路径列表"""
-    return [
-        os.path.abspath(os.path.join(dirpath, filename))
-        for dirpath, dirnames, filenames in os.walk(folerpath)
-        for filename in filenames
-        if suffix_name is None or str(filename).endswith("." + suffix_name)
-    ]
+    return sorted(
+        [
+            os.path.abspath(os.path.join(dirpath, filename))
+            for dirpath, dirnames, filenames in os.walk(folerpath)
+            for filename in filenames
+            if suffix_name is None or str(filename).endswith("." + suffix_name)
+        ],
+        key=lambda filepath: int(".".join(os.path.basename(filepath).split(".")[:-1])),
+    )
 
 
 def get_file_encode(filepath: str) -> Optional[str]:
@@ -22,29 +25,43 @@ def get_file_encode(filepath: str) -> Optional[str]:
     return res
 
 
-def read(filepath: str) -> str:  # 读取文本文件内容
-    if os.path.exists(filepath):
-        with open(filepath, "r", encoding=get_file_encode(filepath)) as f:
-            content = f.read()
-            return content
-    else:
+def read(filepath: str, type: Literal["type", "json", "csv"] = "type") -> Any:
+    # 读取文本文件内容
+    if not os.path.exists(filepath):
         raise Exception("The path {} is not exists".format(filepath))
 
+    if type == "type":
+        with open(filepath, "r", encoding=get_file_encode(filepath)) as f:
+            return f.read()
+    elif type == "json":
+        with open(filepath, "r", encoding="utf-8") as f:
+            return json.load(f)
+    elif type == "csv":
+        with open(filepath, "r", encoding="utf-8", newline="") as f:
+            return list(csv.reader(f))
+    else:
+        raise Exception("The type '{}' is not exists".format(type))
 
-def write(filepath: str, data: Any) -> None:  # 向文件(覆)写内容(性能极低, 能区分文本文件和json文件)
-    with open(
-        file=filepath,
-        mode="w",
-        encoding=get_file_encode(filepath)
-        if os.path.exists(filepath) is True
-        else None,
-    ) as f:
-        if isinstance(data, str):
-            f.write(data)
-        elif isinstance(data, dict):
-            f.write(json.dumps(data))
-        else:
-            raise TypeError("Unsupported data type")
+
+def write(filepath: str, data: Any) -> None:
+    # 向文件(覆)写内容(性能极低), 通过类型区分写入文件类型
+    if isinstance(data, str) or isinstance(data, dict):
+        with open(
+            file=filepath,
+            mode="w",
+            encoding=get_file_encode(filepath)
+            if os.path.exists(filepath) is True
+            else None,
+        ) as f:
+            if isinstance(data, str):
+                f.write(data)
+            elif isinstance(data, dict):
+                f.write(json.dumps(data))
+    elif isinstance(data, list):
+        with open(filepath, "w", encoding="utf-8", newline="") as f:
+            csv.writer(f).writerows(data)
+    else:
+        raise TypeError("Unsupported data type")
 
 
 def mkdir(folder_path):  # 加一个预检防止覆盖
