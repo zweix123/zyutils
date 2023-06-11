@@ -1,7 +1,5 @@
 homepage_url = "https://pages.cs.wisc.edu/~remzi/OSTEP/"
 result_filename = "ostep.pdf"
-
-
 import __init__
 
 import os
@@ -13,7 +11,7 @@ from rich.progress import track
 from util import net_util
 
 
-tmpfilepath = ".zmp"
+tmpfilepath = ".tmp"
 homepage_tmpfilepath = "page.html"  # 后续会变化
 
 
