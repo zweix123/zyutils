@@ -1,5 +1,5 @@
 import os
-import pdfplumber  # scoop ImageMagick, Ghostscript
+import pdfplumber  # need ImageMagick, Ghostscript, can install through scoop in win
 
 
 def pdf_to_imgs(pdfpath: str, distpath: str = os.path.join(".", "images")) -> None:
