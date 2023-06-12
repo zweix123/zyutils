@@ -94,9 +94,11 @@ class Rail(object):
             coro: Coroutine = self.close()
             fut = run_coroutine_threadsafe(coro, self.loop)
             fut.result()
+            self.session = None  # type: ignore
 
-        if self.loop and self.loop.is_running():
+        if self.loop is not None and self.loop.is_running():
             self.loop.stop()
+            self.loop = None  # type: ignore
 
     def __enter__(self):
         self.start()
