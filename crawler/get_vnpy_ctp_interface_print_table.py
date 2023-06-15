@@ -1,3 +1,7 @@
+"""
+vnpy官网展示了它对不同交易所在不同系统上的支持, 但是这些是写在各个网关下的, 我想汇总成表格进行比对
+"""
+
 import __init__
 import re
 from bs4 import BeautifulSoup

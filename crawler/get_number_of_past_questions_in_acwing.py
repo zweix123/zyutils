@@ -1,4 +1,5 @@
 """
+收集在acwing上的总总做题数
 请一定要完成`A + B`, 我按这个判断header对不对的, 早发现早治疗
 找到题库页面, 打开F12, 打开Network选项卡, 刷新页面, Filter problem, 右键, Copy, as CURL, 然后装贴到`https://curlconverter.com/`, 将生成的cookies和headers替换下面代码
 代码主要是网页解析

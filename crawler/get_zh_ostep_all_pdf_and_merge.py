@@ -1,3 +1,9 @@
+"""
+OSTEP的翻译是野生翻译, 我在官网网页找到Markdown格式的目录, 
+将其硬编码进代码中, 然后进行解析, 转置和提取url
+然后**异步**的进行下载
+最后按照序号拼接起来
+"""
 import __init__
 import os, re, shutil
 import PyPDF2

@@ -1,3 +1,10 @@
+"""
+OSTEP是全开源的书籍, 但是每个章节是分开的, 该爬虫会汇总所有章节并拼接起来
+1. 先下载目录表格, 进行解析提取出对应章节的URL(转置, 解析)
+2. **同步**的下载各个章节,
+3. 拼接pdf
+"""
+
 homepage_url = "https://pages.cs.wisc.edu/~remzi/OSTEP/"
 result_filename = "ostep.pdf"
 import __init__
